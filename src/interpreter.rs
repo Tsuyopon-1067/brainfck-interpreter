@@ -31,13 +31,12 @@ impl Interpreter {
         println!();
     }
 
-    // pointer, program counter
     fn excute(&mut self) {
         match self.tokens[self.program_counter] {
             Token::IncrementPointer => {
                 self.pointer += 1;
                 if self.pointer >= self.memory.len() {
-                    panic!("Pointer out of bounds");
+                    panic!("{}", self.create_error_message("Pointer out of bounds"));
                 }
             }
             Token::DecrementPointer => {
@@ -46,13 +45,13 @@ impl Interpreter {
             Token::IncrementValue => {
                 self.memory[self.pointer] += 1;
                 if self.memory[self.pointer] == 0 {
-                    panic!("Memory overflow");
+                    panic!("{}", self.create_error_message("Memory overflow"));
                 }
             }
             Token::DecrementValue => {
                 self.memory[self.pointer] -= 1;
                 if self.memory[self.pointer] == 255 {
-                    panic!("Memory underflow");
+                    panic!("{}", self.create_error_message("Memory underflow"));
                 }
             }
             Token::Output => {
@@ -61,7 +60,7 @@ impl Interpreter {
             }
             Token::Input => {
                 if self.input_pointer >= self.input.len() {
-                    panic!("Input underflow");
+                    panic!("{}", self.create_error_message("Input out of bounds"));
                 }
                 self.memory[self.pointer] = self.input[self.input_pointer] as u8;
             }
@@ -73,11 +72,18 @@ impl Interpreter {
                     self.program_counter = *self
                         .pointer_stack
                         .last()
-                        .expect("Unmatched closing bracket");
+                        .expect(&self.create_error_message("Unmatched closing bracket"));
                 } else {
                     self.pointer_stack.pop();
                 }
             }
         }
+    }
+
+    fn create_error_message(&self, message: &str) -> String {
+        format!(
+            "Error at program counter {}: {}",
+            self.program_counter, message
+        )
     }
 }
