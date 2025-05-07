@@ -1,6 +1,7 @@
 use crate::token::Token;
 
 pub struct Interpreter {
+    debug: bool,
     memory: Vec<u8>,
     pointer: usize,
     pointer_stack: Vec<usize>,
@@ -11,8 +12,9 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    pub fn new(content: String, input: String) -> Self {
+    pub fn new(content: String, input: String, debug: bool) -> Self {
         Interpreter {
+            debug: debug,
             memory: vec![0; 30000],
             pointer: 0,
             pointer_stack: Vec::new(),
@@ -49,8 +51,12 @@ impl Interpreter {
                 self.memory[self.pointer] = self.decrement_value(self.memory[self.pointer]);
             }
             Token::Output => {
-                let current_char = self.memory[self.pointer] as char;
-                print!("{}", current_char);
+                let current_char = self.memory[self.pointer];
+                if self.debug {
+                    print!("{} ", current_char);
+                } else {
+                    print!("{}", current_char as char);
+                }
             }
             Token::Input => {
                 if self.input_pointer >= self.input.len() {

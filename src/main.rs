@@ -9,7 +9,10 @@ use std::io::{self, Read, Write};
 #[command(author, version, about, long_about = None)]
 struct Args {
     filename: String,
-    input: Option<String>,
+    #[clap(short = 'i', long = "input", action)]
+    input: bool,
+    #[clap(short = 'd', long = "debug", action)]
+    debug: bool,
 }
 
 fn main() {
@@ -17,10 +20,10 @@ fn main() {
 
     let program = file_reader::read(&args.filename);
 
-    let input_flag = args.input.is_some();
-    let input_content = get_std_input(input_flag);
+    let input_content = get_std_input(args.input);
+    let debug_flag = args.debug;
 
-    let interpreter = Interpreter::new(program, input_content);
+    let interpreter = Interpreter::new(program, input_content, debug_flag);
     interpreter.interpret();
 }
 
