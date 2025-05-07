@@ -43,16 +43,10 @@ impl Interpreter {
                 self.pointer -= 1;
             }
             Token::IncrementValue => {
-                self.memory[self.pointer] += 1;
-                if self.memory[self.pointer] == 0 {
-                    panic!("{}", self.create_error_message("Memory overflow"));
-                }
+                self.memory[self.pointer] = self.increment_value(self.memory[self.pointer]);
             }
             Token::DecrementValue => {
-                self.memory[self.pointer] -= 1;
-                if self.memory[self.pointer] == 255 {
-                    panic!("{}", self.create_error_message("Memory underflow"));
-                }
+                self.memory[self.pointer] = self.decrement_value(self.memory[self.pointer]);
             }
             Token::Output => {
                 let current_char = self.memory[self.pointer] as char;
@@ -85,5 +79,21 @@ impl Interpreter {
             "Error at program counter {}: {}",
             self.program_counter, message
         )
+    }
+
+    fn increment_value(&self, current_value: u8) -> u8 {
+        if current_value == 255 {
+            0
+        } else {
+            current_value + 1
+        }
+    }
+
+    fn decrement_value(&self, current_value: u8) -> u8 {
+        if current_value == 0 {
+            255
+        } else {
+            current_value - 1
+        }
     }
 }
