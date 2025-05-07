@@ -66,15 +66,30 @@ impl Interpreter {
             }
             Token::JumpForward => {
                 self.pointer_stack.push(self.program_counter);
+                if self.memory[self.pointer] == 0 {
+                    let mut depth = 0;
+                    while self.tokens[self.program_counter] != Token::JumpBackward && depth == 0 {
+                        self.program_counter += 1;
+                        if self.program_counter >= self.tokens.len() {
+                            panic!("{}", self.create_error_message("Unmatched opening bracket"));
+                        }
+                        if self.tokens[self.program_counter] == Token::JumpForward {
+                            depth += 1;
+                        } else if self.tokens[self.program_counter] == Token::JumpBackward {
+                            depth -= 1;
+                        }
+                    }
+                    self.pointer_stack.pop();
+                }
             }
             Token::JumpBackward => {
-                if self.memory[self.pointer] != 0 {
+                if self.memory[self.pointer] == 0 {
+                    self.pointer_stack.pop();
+                } else {
                     self.program_counter = *self
                         .pointer_stack
                         .last()
                         .expect(&self.create_error_message("Unmatched closing bracket"));
-                } else {
-                    self.pointer_stack.pop();
                 }
             }
         }
