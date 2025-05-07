@@ -36,13 +36,10 @@ impl Interpreter {
     fn excute(&mut self) {
         match self.tokens[self.program_counter] {
             Token::IncrementPointer => {
-                self.pointer += 1;
-                if self.pointer >= self.memory.len() {
-                    panic!("{}", self.create_error_message("Pointer out of bounds"));
-                }
+                self.pointer = self.increment_pointer(self.pointer);
             }
             Token::DecrementPointer => {
-                self.pointer -= 1;
+                self.pointer = self.decrement_pointer(self.pointer);
             }
             Token::IncrementValue => {
                 self.memory[self.pointer] = self.increment_value(self.memory[self.pointer]);
@@ -113,6 +110,22 @@ impl Interpreter {
     fn decrement_value(&self, current_value: u8) -> u8 {
         if current_value == 0 {
             255
+        } else {
+            current_value - 1
+        }
+    }
+
+    fn increment_pointer(&self, current_value: usize) -> usize {
+        if current_value == self.memory.len() - 1 {
+            0
+        } else {
+            current_value + 1
+        }
+    }
+
+    fn decrement_pointer(&self, current_value: usize) -> usize {
+        if current_value == 0 {
+            self.memory.len() - 1
         } else {
             current_value - 1
         }
